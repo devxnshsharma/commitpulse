@@ -73,6 +73,7 @@ export default function LandingPage() {
   const [copied, setCopied] = useState(false);
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [svgState, setSvgState] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const guideRef = useRef<HTMLDivElement>(null);
   const { searches, addSearch, clearSearches, removeSearch } = useRecentSearches();
   const trimmedUsername = username.trim();
@@ -100,7 +101,14 @@ export default function LandingPage() {
     const controller = new AbortController();
 
     fetch(badgeUrl, { signal: controller.signal })
-      .then((res) => {
+      .then(async (res) => {
+        const text = await res.text();
+        if (res.ok === false && (res.status === 429 || res.status === 400)) {
+          setSvgContent(null);
+          setSvgState('error');
+          setErrorMessage('GitHub user not found');
+          return;
+        }
         if (!res.ok) {
           setSvgState('error');
           return;
@@ -111,6 +119,7 @@ export default function LandingPage() {
         if (!text) return;
         setSvgContent(text);
         setSvgState('loaded');
+        setErrorMessage(null);
       })
       .catch((err) => {
         if (err.name === 'AbortError') return;
@@ -373,6 +382,9 @@ export default function LandingPage() {
                       className="cp-svg-container w-full max-w-[700px] drop-shadow-[0_30px_60px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)] [&>svg]:w-full [&>svg]:h-auto"
                       dangerouslySetInnerHTML={{ __html: svgContent }}
                     />
+                  )}
+                  {svgState === 'loaded' && !svgContent && errorMessage && (
+                    <p className="text-red-400 text-sm text-center">{errorMessage}</p>
                   )}
                 </div>
               ) : (
