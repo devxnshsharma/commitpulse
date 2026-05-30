@@ -770,7 +770,7 @@ export async function getFullDashboardData(username: string, options: FetchOptio
       ? calendarResult.value.calendar
       : ({ totalContributions: 0, weeks: [] } as ContributionCalendar);
   const repoContributions =
-    calendarResult.status === 'fulfilled' ? calendarResult.value.repoContributions : [];
+    calendarResult.status === 'fulfilled' ? calendarResult.value.repoContributions || [] : [];
 
   const streakStats = calculateStreak(calendarData);
   const totalStars = reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0);

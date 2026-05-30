@@ -165,7 +165,10 @@ describe('fetchGitHubContributions', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -182,7 +185,10 @@ describe('fetchGitHubContributions', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -212,7 +218,10 @@ describe('fetchGitHubContributions', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -591,7 +600,19 @@ describe('getFullDashboardData', () => {
       return mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [
+                {
+                  repository: { primaryLanguage: { name: 'TypeScript' } },
+                  contributions: { totalCount: 200 },
+                },
+                {
+                  repository: { primaryLanguage: { name: 'Rust' } },
+                  contributions: { totalCount: 100 },
+                },
+              ],
+            },
           },
         },
       });
@@ -670,7 +691,10 @@ describe('getFullDashboardData', () => {
       return mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       });
@@ -699,7 +723,10 @@ describe('getFullDashboardData', () => {
       return mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       });
@@ -769,7 +796,10 @@ describe('GitHub API cache behavior', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -802,7 +832,10 @@ describe('GitHub API cache behavior', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -817,7 +850,10 @@ describe('GitHub API cache behavior', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -837,7 +873,10 @@ describe('GitHub API cache behavior', () => {
       mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       })
@@ -1185,7 +1224,10 @@ describe('getOrgDashboardData', () => {
       return mockResponse({
         data: {
           user: {
-            contributionsCollection: { contributionCalendar: mockCalendar },
+            contributionsCollection: {
+              contributionCalendar: mockCalendar,
+              commitContributionsByRepository: [],
+            },
           },
         },
       });
