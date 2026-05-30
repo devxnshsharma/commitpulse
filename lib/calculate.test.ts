@@ -374,6 +374,120 @@ describe('calculateStreak', () => {
     expect(resultLeapGap.currentStreak).toBe(1);
     expect(resultLeapGap.longestStreak).toBe(1);
   });
+
+  it('correctly calculates current and longest streaks when commits are made exclusively on Saturdays and Sundays', () => {
+    // 2024-01-01 is a Monday.
+    // Days in a week: Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    // Index:          0,   1,   2,   3,   4,   5,   6
+    // Commits only on Sat (index 5) and Sun (index 6).
+    // Week 1: 0, 0, 0, 0, 0, 1, 1 (Sat Jan 6, Sun Jan 7)
+    // Week 2: 0, 0, 0, 0, 0, 1, 1 (Sat Jan 13, Sun Jan 14)
+    // Week 3: 0, 0, 0, 0, 0, 1, 1 (Sat Jan 20, Sun Jan 21)
+    const calendar = buildCalendar([
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 1 (Jan 1 to Jan 7)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 2 (Jan 8 to Jan 14)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 3 (Jan 15 to Jan 21)
+    ]);
+
+    // 1. Evaluate on Sunday, Jan 21, 2024 (which is the last day with commits)
+    // The current streak should be 2 (Sat & Sun) because weekdays are empty.
+    // The longest streak should be 2.
+    const resultSunday = calculateStreak(calendar, 'UTC', new Date('2024-01-21T12:00:00Z'));
+    expect(resultSunday.currentStreak).toBe(2);
+    expect(resultSunday.longestStreak).toBe(2);
+
+    // 2. Evaluate on Monday, Jan 22, 2024 (weekdays have no commits, index 21 has 0 commits)
+    // Let's construct a calendar including Monday Jan 22 so "today" is explicitly present in the data.
+    const calendarWithMonday = buildCalendar([
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 1 (Jan 1 to Jan 7)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 2 (Jan 8 to Jan 14)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 3 (Jan 15 to Jan 21)
+      0, // Monday, Jan 22 (0 commits)
+    ]);
+
+    // Monday (today is 0, yesterday Sunday was 1) - grace period of 1 should keep the streak alive.
+    // So current streak should still be 2.
+    const resultMonday = calculateStreak(
+      calendarWithMonday,
+      'UTC',
+      new Date('2024-01-22T12:00:00Z')
+    );
+    expect(resultMonday.currentStreak).toBe(2);
+    expect(resultMonday.longestStreak).toBe(2);
+
+    // 3. Evaluate on Tuesday, Jan 23, 2024 (index 22 has 0 commits)
+    const calendarWithTuesday = buildCalendar([
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 1 (Jan 1 to Jan 7)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 2 (Jan 8 to Jan 14)
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1, // Week 3 (Jan 15 to Jan 21)
+      0,
+      0, // Monday Jan 22, Tuesday Jan 23 (0 commits)
+    ]);
+
+    // Tuesday (today is 0, yesterday Monday is 0) - grace period of 1 cannot keep it alive.
+    // So current streak resets to 0.
+    const resultTuesday = calculateStreak(
+      calendarWithTuesday,
+      'UTC',
+      new Date('2024-01-23T12:00:00Z')
+    );
+    expect(resultTuesday.currentStreak).toBe(0);
+    expect(resultTuesday.longestStreak).toBe(2);
+  });
 });
 
 it('handles massive single-day commit spike timeline', () => {
