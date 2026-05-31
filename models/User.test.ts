@@ -30,6 +30,23 @@ describe('User Model', () => {
         expect(typeof result).toBe('number');
         expect(Number.isFinite(result)).toBe(true);
       });
+
+      it('has a defined defaultValue that is Date.now or returns a Date', () => {
+        const createdAtPath = User.schema.path('createdAt') as mongoose.SchemaType & {
+          defaultValue?: unknown;
+          options: { default?: unknown };
+        };
+
+        const defaultValue = createdAtPath.defaultValue ?? createdAtPath.options.default;
+
+        expect(defaultValue).toBeDefined();
+
+        if (defaultValue !== Date.now) {
+          expect(typeof defaultValue).toBe('function');
+          const value = (defaultValue as () => unknown)();
+          expect(value instanceof Date).toBe(true);
+        }
+      });
     });
     it('has trim: true on username path', () => {
       const usernamePath = User.schema.path('username') as mongoose.SchemaType & {
@@ -50,6 +67,30 @@ describe('User Model', () => {
         options: Record<string, unknown>;
       };
       expect(usernamePath.options.required).toBe(true);
+    });
+  });
+  describe('Database Connection State 2 Handling', () => {
+    it('keeps the User model usable while mongoose is connecting', async () => {
+      const { vi } = await import('vitest');
+
+      const readyStateSpy = vi
+        .spyOn(mongoose.connection, 'readyState', 'get')
+        .mockReturnValue(2 as unknown as typeof mongoose.connection.readyState);
+
+      expect(mongoose.connection.readyState).toBe(2);
+      expect(User).toBeDefined();
+      expect(User.modelName).toBe('User');
+
+      const usernamePath = User.schema.path('username') as mongoose.SchemaType & {
+        options: Record<string, unknown>;
+      };
+
+      expect(usernamePath.options.required).toBe(true);
+      expect(usernamePath.options.unique).toBe(true);
+      expect(usernamePath.options.lowercase).toBe(true);
+      expect(usernamePath.options.trim).toBe(true);
+
+      readyStateSpy.mockRestore();
     });
   });
 });
