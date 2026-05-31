@@ -62,5 +62,6 @@ export const config = {
     '/api/stats/:path*',
     '/api/og/:path*',
     '/api/notify/:path*',
+    '/api/compare/:path*',
   ],
 };
