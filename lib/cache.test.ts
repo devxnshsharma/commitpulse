@@ -549,7 +549,7 @@ describe('TTLCache', () => {
 
       cache.destroy();
     });
-// FIX: New test targeting the NaN boundary for Issue #1399
+    // FIX: New test targeting the NaN boundary for Issue #1399
     it('resolves NaN TTL to the default standard TTL duration', () => {
       vi.useFakeTimers();
       const cache = new TTLCache<string>();
@@ -700,6 +700,5 @@ describe('DistributedCache', () => {
       })
     );
     cache.destroy();
-  });
   });
 });
