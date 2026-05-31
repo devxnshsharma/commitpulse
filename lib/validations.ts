@@ -254,7 +254,7 @@ const baseStreakParamsSchema = z.object({
     .string()
     .optional()
     .transform((val) => {
-      if (val === undefined) return true;
+      if (val === undefined) return undefined; // Let .default() handle it!
       return val === 'true' || val === '1';
     })
     .default(true),
