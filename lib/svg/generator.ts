@@ -26,7 +26,7 @@ export function truncateUsername(username: string): string {
   return username.length > 12 ? `${username.slice(0, 12)}...` : username;
 }
 
-function deterministicRandom(seed: string): number {
+export function deterministicRandom(seed: string): number {
   let hash = 2166136261;
   for (let i = 0; i < seed.length; i++) {
     hash ^= seed.charCodeAt(i);
@@ -159,8 +159,13 @@ function renderDefs(sf: number, params: BadgeParams): string {
     }
   }
 
+  const filterGlow =
+    params.glow !== false
+      ? `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${fs(5)}" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>`
+      : '';
+
   return `<defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${fs(5)}" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>
+    ${filterGlow}
     ${gradients}
   </defs>`;
 }
@@ -172,15 +177,16 @@ function renderStatsSection(
   params: BadgeParams
 ): string {
   const totalLabel = params.mode === 'loc' ? 'TOTAL LINES OF CODE' : labels.ANNUAL_SYNC_TOTAL;
+  const glowAttr = params.glow !== false ? ' filter="url(#glow)"' : '';
 
   return `
   <g transform="translate(${s(100)}, ${s(340)})" text-anchor="middle">
     <text class="label">${labels.CURRENT_STREAK}</text>
-    <text y="${s(40)}" class="stats" filter="url(#glow)">${stats.currentStreak}</text>
+    <text y="${s(40)}" class="stats"${glowAttr}>${stats.currentStreak}</text>
   </g>
   <g transform="translate(${s(300)}, ${s(340)})" text-anchor="middle">
     <text class="label">${totalLabel}</text>
-    <text y="${s(40)}" class="total-val" filter="url(#glow)">${stats.totalContributions}</text>
+    <text y="${s(40)}" class="total-val"${glowAttr}>${stats.totalContributions}</text>
   </g>
   <g transform="translate(${s(500)}, ${s(340)})" text-anchor="middle">
     <text class="label">${labels.PEAK_STREAK}</text>
@@ -907,6 +913,16 @@ export function generateWrappedSVG(
     ? 'class="cp-accent-stroke" stroke-opacity="0.15" stroke-width="1.5"'
     : borderAttr;
 
+  const filterGlow =
+    params.glow !== false
+      ? `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>`
+      : '';
+
+  const glowAttr = params.glow !== false ? ' filter="url(#glow)"' : '';
+
   return `
 <svg
   xmlns="http://www.w3.org/2000/svg"
@@ -918,10 +934,7 @@ export function generateWrappedSVG(
 >
   <title>${safeUser}'s GitHub Wrapped ${year}</title>
   <defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3.5" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
+    ${filterGlow}
   </defs>
 
   <style>
@@ -931,13 +944,13 @@ export function generateWrappedSVG(
 
   .title-user { font-family: ${selectedFont || '"Syncopate", sans-serif'}; font-weight: 700; font-size: 13px; letter-spacing: 2.5px; opacity: 0.85; }
   .title-wrapped { font-family: ${selectedFont || '"Syncopate", sans-serif'}; font-weight: 700; font-size: 13px; letter-spacing: 2.5px; }
- 
+
   .total-commits { font-family: ${statsFont}; font-size: 46px; font-weight: 700; }
   .total-label { font-family: "Roboto", sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; opacity: 0.5; }
- 
+
   .grid-label { font-family: "Roboto", sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; opacity: 0.5; }
   .grid-val { font-family: ${statsFont}; font-size: 14.5px; font-weight: 600; }
- 
+
   .scan-line {
     animation: scan-sweep var(--scan-speed, 8s) linear infinite;
     transform-box: fill-box;
@@ -976,7 +989,7 @@ export function generateWrappedSVG(
   </g>
 
   <g transform="translate(25, 120)">
-    <text x="0" y="15" class="total-commits" ${accentClass} filter="url(#glow)">${stats.totalContributions}</text>
+    <text x="0" y="15" class="total-commits" ${accentClass}${glowAttr}>${stats.totalContributions}</text>
     <text x="2" y="38" class="total-label" ${textClass}>TOTAL CONTRIBUTIONS</text>
   </g>
 
@@ -1086,11 +1099,11 @@ function generateAutoThemeMonthlySVG(stats: MonthlyStats, params: BadgeParams): 
   ${googleFontsImport}
   :root { --cp-bg: #${light.bg}; --cp-text: #${light.text}; --cp-accent: #${light.accent}; --cp-negative: #${light.negative || 'cf222e'}; }
   @media (prefers-color-scheme: dark) { :root { --cp-bg: #${dark.bg}; --cp-text: #${dark.text}; --cp-accent: #${dark.accent}; --cp-negative: #${dark.negative || 'f85149'}; } }
-  .cp-bg-fill { fill: var(--cp-bg); } 
-  .cp-text-fill { fill: var(--cp-text); color: var(--cp-text); } 
+  .cp-bg-fill { fill: var(--cp-bg); }
+  .cp-text-fill { fill: var(--cp-text); color: var(--cp-text); }
   .cp-accent-fill { fill: var(--cp-accent); color: var(--cp-accent); }
   .cp-delta-fill { fill: ${stats.deltaAbsolute >= 0 ? 'var(--cp-accent)' : 'var(--cp-negative)'}; }
- 
+
   .title { font-family: ${selectedFont || '"Syncopate", sans-serif'}; fill: var(--cp-text); font-size: 14px; letter-spacing: 2px; font-weight: 400; opacity: 0.8; }
   .stats { font-family: ${statsFont}; fill: var(--cp-accent); font-size: 36px; font-weight: 600; letter-spacing: 0; }
   .label { font-family: "Roboto", sans-serif; fill: var(--cp-text); font-size: 10px; font-weight: 400; letter-spacing: 1px; opacity: 0.7; }
@@ -1155,7 +1168,8 @@ function renderHeatmapGrid(
   sf: number,
   todayDate: string,
   mode: 'commits' | 'loc' = 'commits',
-  isAutoTheme: boolean = false
+  isAutoTheme: boolean = false,
+  glow: boolean = true
 ): string {
   const weeks = calendar.weeks.slice(-14);
   const cellSize = Math.round(HEATMAP_CELL_SIZE * sf);
@@ -1203,7 +1217,7 @@ function renderHeatmapGrid(
       const fillAttr = isAutoTheme ? 'fill="var(--cp-accent)"' : `fill="${accent}"`;
 
       // Glow on high-intensity cells
-      const filterAttr = intensity === 4 ? ' filter="url(#hm-glow)"' : '';
+      const filterAttr = intensity === 4 && glow !== false ? ' filter="url(#hm-glow)"' : '';
 
       cells += `
       <rect
@@ -1329,10 +1343,27 @@ export function generateHeatmapSVG(
   const labelFill = isLightBg ? text : accent;
   const labelOpacity = isLightBg ? 0.8 : 0.7;
 
-  const grid = renderHeatmapGrid(calendar, accent, text, sf, stats.todayDate, params.mode, false);
+  const grid = renderHeatmapGrid(
+    calendar,
+    accent,
+    text,
+    sf,
+    stats.todayDate,
+    params.mode,
+    false,
+    params.glow !== false
+  );
   const legend = renderHeatmapLegend(accent, text, sf, s(60), s(270), false);
 
   const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+
+  const filterGlow =
+    params.glow !== false
+      ? `<filter id="hm-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="${Math.round(3 * sf)}" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>`
+      : '';
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" fill="none" role="img">
@@ -1340,10 +1371,7 @@ export function generateHeatmapSVG(
   <desc>${safeUser} has ${stats.totalContributions} ${unit} and a longest streak of ${stats.longestStreak} days.</desc>
 
   <defs>
-    <filter id="hm-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="${Math.round(3 * sf)}" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
+    ${filterGlow}
   </defs>
 
   <style>
@@ -1445,10 +1473,27 @@ function generateAutoThemeHeatmapSVG(
   const H = Math.round(300 * sf);
   const s = createScaler(sf);
 
-  const grid = renderHeatmapGrid(calendar, '', '', sf, stats.todayDate, params.mode, true);
+  const grid = renderHeatmapGrid(
+    calendar,
+    '',
+    '',
+    sf,
+    stats.todayDate,
+    params.mode,
+    true,
+    params.glow !== false
+  );
   const legend = renderHeatmapLegend('', '', sf, s(60), s(270), true);
 
   const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+
+  const filterGlow =
+    params.glow !== false
+      ? `<filter id="hm-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="${Math.round(3 * sf)}" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>`
+      : '';
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" fill="none" role="img">
@@ -1456,10 +1501,7 @@ function generateAutoThemeHeatmapSVG(
   <desc>${safeUser} has ${stats.totalContributions} ${unit} and a longest streak of ${stats.longestStreak} days.</desc>
 
   <defs>
-    <filter id="hm-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="${Math.round(3 * sf)}" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
+    ${filterGlow}
   </defs>
 
   <style>
@@ -1777,7 +1819,7 @@ export function generateVersusSVG(
   ${renderDefs(sf, params)}
   ${renderStyle(selectedFont, statsFont, googleFontsImport, text, accent, sf, bg)}
   <rect width="${W}" height="${H}" rx="${radius}" fill="${params.hideBackground ? 'transparent' : bg}" />
- 
+
   <g transform="translate(0, 0)">
     <g transform="translate(0, ${Math.round(20 * sf)})">${towers1}</g>
     ${renderIsometricLabels(calendar1, params, text, sf)}
@@ -1791,7 +1833,7 @@ export function generateVersusSVG(
   </g>
 
   <line x1="${singleW}" y1="${s(40)}" x2="${singleW}" y2="${H - s(40)}" stroke="${text}" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="4 4" />
- 
+
   <g transform="translate(${singleW}, ${H / 2})">
     <circle cx="0" cy="0" r="${s(24)}" fill="${bg}" stroke="${accent}" stroke-width="2" />
     <text x="0" y="${s(6)}" text-anchor="middle" font-family="${statsFont}" fill="${accent}" font-size="${s(16)}" font-weight="bold">VS</text>
@@ -1912,7 +1954,7 @@ function generateAutoThemeVersusSVG(
   <title>CommitPulse Versus Stats: ${safeUser1} vs ${safeUser2}</title>
   <desc>${safeUser1} has ${stats1.totalContributions} ${unit}. ${safeUser2} has ${stats2.totalContributions} ${unit}.</desc>
   ${renderDefs(sf, params)}
- 
+
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Fira+Code&amp;family=JetBrains+Mono&amp;family=Roboto&amp;family=Syncopate:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap');
   :root { --cp-bg: #${light.bg}; --cp-text: #${light.text}; --cp-accent: #${light.accent}; --cp-label-fill: ${lightLabelFill}; --cp-label-opacity: ${lightLabelOpacity}; }
@@ -1945,7 +1987,7 @@ function generateAutoThemeVersusSVG(
   </style>
 
   <rect width="${W}" height="${H}" rx="${radius}" class="${params.hideBackground ? '' : 'cp-bg-fill'}" fill="${params.hideBackground ? 'transparent' : ''}" />
- 
+
   <g transform="translate(0, 0)">
     <g transform="translate(0, ${Math.round(20 * sf)})">${towers1}</g>
     ${renderIsometricLabels(calendar1, params, '', sf)}
@@ -1959,7 +2001,7 @@ function generateAutoThemeVersusSVG(
   </g>
 
   <line x1="${singleW}" y1="${s(40)}" x2="${singleW}" y2="${H - s(40)}" stroke="var(--cp-text)" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="4 4" />
- 
+
   <g transform="translate(${singleW}, ${H / 2})">
     <circle cx="0" cy="0" r="${s(24)}" class="cp-bg-fill" stroke="var(--cp-accent)" stroke-width="2" />
     <text x="0" y="${s(6)}" text-anchor="middle" font-family="${statsFont}" class="cp-accent-fill" font-size="${s(16)}" font-weight="bold">VS</text>

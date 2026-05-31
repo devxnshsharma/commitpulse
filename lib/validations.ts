@@ -185,6 +185,16 @@ const baseStreakParamsSchema = z.object({
       },
       { message: 'Invalid "to" date format. Use ISO 8601 (e.g. 2023-12-31).' }
     ),
+  date: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        return !isNaN(Date.parse(val));
+      },
+      { message: 'Invalid "date" format. Use ISO 8601.' }
+    ),
   refresh: z.string().optional().transform(toRefreshFlag),
   hide_title: z.string().optional().transform(toBooleanFlag),
   hide_background: z.string().optional().transform(toBooleanFlag),
@@ -192,7 +202,7 @@ const baseStreakParamsSchema = z.object({
   lang: z.enum(supportedLanguages).catch('en').default('en'),
   tz: timeZoneParam,
   // Unknown view values fall back to the default dashboard view.
-  view: z.enum(['default', 'monthly', 'heatmap', 'pulse']).catch('default').default('default'),
+  view: z.enum(['default', 'monthly']).catch('default').default('default'),
   // Invalid delta formats fall back to percentage mode.
   delta_format: z.enum(['percent', 'absolute', 'both']).catch('percent').default('percent'),
   width: dimensionParam('width', 100, 1200),
@@ -242,7 +252,14 @@ const baseStreakParamsSchema = z.object({
     .string()
     .optional()
     .transform((val) => val === 'true' || val === '1'),
-  entrance: z.enum(['rise', 'fade', 'slide', 'none']).catch('rise').default('rise'),
+  glow: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return true;
+      return val === 'true' || val === '1';
+    })
+    .default(true),
 });
 
 export const streakParamsSchema = baseStreakParamsSchema.refine(
