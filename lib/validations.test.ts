@@ -812,8 +812,9 @@ describe('streakParamsSchema — tz IANA timezone validation (Variation 4)', () 
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0]?.message).toContain('Invalid timezone');
-    }
+  if (!result.success) {
+        expect(result.error.issues[0]?.message).toContain('Invalid timezone');
+      }
+    });
   });
 }); 
