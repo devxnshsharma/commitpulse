@@ -476,7 +476,7 @@ export class DistributedCache<T> {
           return fallbackData;
         }
 
-        // Lock not acquired. Wait and poll L2 cache.
+        // Wait briefly before checking whether another instance populated the cache.
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
         const doubleCheck = await this.get(key);
 
