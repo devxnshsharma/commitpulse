@@ -229,7 +229,7 @@ function CustomizePageInner(): ReactElement {
       .then((text) => {
         if (!text) return;
         const sanitized = DOMPurify.sanitize(text, {
-          USE_PROFILES: { svg: true },
+          USE_PROFILES: { svg: true, svgFilters: true },
           ADD_TAGS: ['animate', 'style'],
           ADD_ATTR: [
             'fill',

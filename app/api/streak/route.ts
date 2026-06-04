@@ -12,6 +12,7 @@ import {
   generateVersusSVG,
   generateHeatmapSVG,
   generatePulseSVG,
+  generateSkylineSVG,
 } from '@/lib/svg/generator';
 import { getSecondsUntilUTCMidnight, getSecondsUntilMidnightInTimezone } from '@/utils/time';
 import type { BadgeParams, ContributionCalendar } from '@/types';
@@ -394,6 +395,9 @@ export async function GET(request: Request) {
       // even though the sparkline generator will extract its own daily 30-day timeline below.
       const stats = calculateStreak(calendar, timezone, undefined, grace);
       svg = generatePulseSVG(stats, params, calendar);
+    } else if (view === 'skyline') {
+      const stats = calculateStreak(calendar, timezone, undefined, grace);
+      svg = generateSkylineSVG(stats, params, calendar);
     } else if (versus && versusCalendar) {
       const stats1 = calculateStreak(calendar, timezone, undefined, grace);
       const stats2 = calculateStreak(versusCalendar, timezone, undefined, grace);
