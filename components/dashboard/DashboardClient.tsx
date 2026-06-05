@@ -908,7 +908,7 @@ export default function DashboardClient({
                   <div className="grid grid-cols-2 gap-4 text-sm font-semibold mt-1">
                     <div
                       className={
-                        gapA < gapB || gapB === 0
+                        gapA < gapB
                           ? 'text-emerald-500 dark:text-emerald-400'
                           : 'text-gray-900 dark:text-white'
                       }
@@ -917,7 +917,7 @@ export default function DashboardClient({
                     </div>
                     <div
                       className={
-                        gapB < gapA || gapA === 0
+                        gapB < gapA
                           ? 'text-emerald-500 dark:text-emerald-400 text-right'
                           : 'text-gray-900 dark:text-white text-right'
                       }
