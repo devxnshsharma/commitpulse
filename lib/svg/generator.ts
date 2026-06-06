@@ -192,7 +192,7 @@ function renderHeader(
   params: BadgeParams,
   safeId: string
 ): string {
-  const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+  const unit = params.mode === 'loc' ? 'est. lines of code' : 'total contributions';
   const entity = params.org ? 'Organization' : params.repo ? 'Repository' : 'User';
 
   return `
@@ -907,8 +907,9 @@ export function generateMonthlySVG(stats: MonthlyStats, params: BadgeParams): st
     ? `@import url('https://fonts.googleapis.com/css2?family=${googleFontUrlPart}&amp;display=swap');`
     : '';
 
-  const commitsLabel = params.mode === 'loc' ? 'LINES THIS MONTH' : labels.COMMITS_THIS_MONTH;
-  const deltaUnit = params.mode === 'loc' ? 'lines' : 'commits';
+  const commitsLabel =
+    params.mode === 'loc' ? 'LINES THIS MONTH (EST.)' : labels.COMMITS_THIS_MONTH;
+  const deltaUnit = params.mode === 'loc' ? 'LINES (EST.)' : 'COMMITS';
 
   let deltaText = '';
   if (params.delta_format === 'absolute') {
@@ -1277,8 +1278,9 @@ function generateAutoThemeMonthlySVG(stats: MonthlyStats, params: BadgeParams): 
   const width = params.width || 300;
   const height = params.height || 120;
 
-  const commitsLabel = params.mode === 'loc' ? 'LINES THIS MONTH' : labels.COMMITS_THIS_MONTH;
-  const deltaUnit = params.mode === 'loc' ? 'lines' : 'commits';
+  const commitsLabel =
+    params.mode === 'loc' ? 'LINES THIS MONTH (EST.)' : labels.COMMITS_THIS_MONTH;
+  const deltaUnit = params.mode === 'loc' ? 'LINES (EST.)' : 'COMMITS';
 
   let deltaText = '';
   if (params.delta_format === 'absolute') {
@@ -1439,7 +1441,7 @@ function renderHeatmapGrid(
         day.date === todayDate ||
         (!todayInWindow && col === weeks.length - 1 && row === week.contributionDays.length - 1);
 
-      const unit = mode === 'loc' ? 'lines of code' : 'contributions';
+      const unit = mode === 'loc' ? 'est. lines of code' : 'contributions';
       const tooltipPrefix = isToday ? 'TODAY: ' : '';
       const tooltip = `${tooltipPrefix}${day.date}: ${count} ${unit}`;
 
@@ -1577,7 +1579,7 @@ export function generateHeatmapSVG(
   );
   const legend = renderHeatmapLegend(accent, text, sf, s(60), s(270), false);
 
-  const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+  const unit = params.mode === 'loc' ? 'est. lines of code' : 'total contributions';
 
   const filterGlow =
     params.glow !== false
@@ -1653,7 +1655,7 @@ export function generateHeatmapSVG(
       <text y="${s(22)}" class="hm-stats-val">${stats.currentStreak}</text>
     </g>
     <g transform="translate(${s(160)}, 0)">
-      <text class="hm-label">${params.mode === 'loc' ? 'TOTAL LINES OF CODE' : labels.ANNUAL_SYNC_TOTAL}</text>
+      <text class="hm-label">${params.mode === 'loc' ? 'TOTAL LINES OF CODE (EST.)' : labels.ANNUAL_SYNC_TOTAL}</text>
       <text y="${s(22)}" class="hm-total-val">${stats.totalContributions}</text>
     </g>
     <g transform="translate(${s(360)}, 0)">
@@ -1704,7 +1706,7 @@ function generateAutoThemeHeatmapSVG(
   );
   const legend = renderHeatmapLegend('', '', sf, s(60), s(270), true);
 
-  const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+  const unit = params.mode === 'loc' ? 'est. lines of code' : 'total contributions';
 
   const filterGlow =
     params.glow !== false
@@ -1786,7 +1788,7 @@ function generateAutoThemeHeatmapSVG(
       <text y="${s(22)}" class="hm-stats-val">${stats.currentStreak}</text>
     </g>
     <g transform="translate(${s(160)}, 0)">
-      <text class="hm-label">${params.mode === 'loc' ? 'TOTAL LINES OF CODE' : labels.ANNUAL_SYNC_TOTAL}</text>
+      <text class="hm-label">${params.mode === 'loc' ? 'TOTAL LINES OF CODE (EST.)' : labels.ANNUAL_SYNC_TOTAL}</text>
       <text y="${s(22)}" class="hm-total-val">${stats.totalContributions}</text>
     </g>
     <g transform="translate(${s(360)}, 0)">
@@ -2044,7 +2046,7 @@ export function generateVersusSVG(
   const towers2 = renderTowers(towerData2, params, accent, text, sf, false, params.opacity ?? 1.0);
 
   const s = createScaler(sf);
-  const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+  const unit = params.mode === 'loc' ? 'est. lines of code' : 'total contributions';
 
   const safeId = `${safeUser1}_vs_${safeUser2}`.replace(/[^a-zA-Z0-9-]/g, '_').toLowerCase();
 
@@ -2187,7 +2189,7 @@ function generateAutoThemeVersusSVG(
 
   const s = createScaler(sf);
   const fs = (n: number): number => Math.round(n * sf * 10) / 10;
-  const unit = params.mode === 'loc' ? 'lines of code' : 'total contributions';
+  const unit = params.mode === 'loc' ? 'est. lines of code' : 'total contributions';
 
   const safeId = `${safeUser1}_vs_${safeUser2}`.replace(/[^a-zA-Z0-9-]/g, '_').toLowerCase();
 
@@ -2429,7 +2431,7 @@ export function generatePulseSVG(
   ${
     !params.hide_stats
       ? `
-  <text x="${width - 30}" y="42" text-anchor="end" class="stats">${pulseTotal} ${params.mode === 'loc' ? 'LINES' : 'COMMITS'}</text>
+  <text x="${width - 30}" y="42" text-anchor="end" class="stats">${pulseTotal} ${params.mode === 'loc' ? 'LINES (EST.)' : 'COMMITS'}</text>
   <text x="${width - 30}" y="58" text-anchor="end" class="label">LAST 30 DAYS</text>
   `
       : ''
@@ -2617,7 +2619,7 @@ function generateAutoThemePulseSVG(
   ${
     !params.hide_stats
       ? `
-  <text x="${width - 30}" y="42" text-anchor="end" class="stats">${pulseTotal} ${params.mode === 'loc' ? 'LINES' : 'COMMITS'}</text>
+  <text x="${width - 30}" y="42" text-anchor="end" class="stats">${pulseTotal} ${params.mode === 'loc' ? 'LINES (EST.)' : 'COMMITS'}</text>
   <text x="${width - 30}" y="58" text-anchor="end" class="label">LAST 30 DAYS</text>
   `
       : ''
