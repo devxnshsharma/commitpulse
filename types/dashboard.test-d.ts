@@ -7,7 +7,10 @@ import type {
   WrappedStats,
   OrgDashboardData,
   Repository,
+  UserStats,
 } from './dashboard';
+
+import type { ContributionCalendar } from './index';
 
 describe('dashboard type safety', () => {
   it('UserProfile contains required fields', () => {
@@ -20,6 +23,13 @@ describe('dashboard type safety', () => {
       location: string;
       joinedDate: string;
       developerScore: number;
+      type?: 'User' | 'Organization';
+      stats: {
+        repositories: number;
+        followers: number;
+        following: number;
+        stars: number;
+      };
     }>();
   });
 
@@ -42,7 +52,15 @@ describe('dashboard type safety', () => {
       busiestMonth: string;
       weekendRatio: number;
       topLanguage: string;
-      calendar: unknown;
+      calendar: ContributionCalendar;
+    }>();
+  });
+
+  it('OrgDashboardData contains expected fields', () => {
+    expectTypeOf<OrgDashboardData>().toMatchTypeOf<{
+      profile: UserProfile;
+      stats: UserStats;
+      calendar: ContributionCalendar;
     }>();
   });
 
