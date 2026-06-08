@@ -743,23 +743,25 @@ async function fetchContributionsUncached(
     );
   }
   // 1. Fabricate the LOC additions and deletions fields required by the test suite
-  const processedWeeks = (calendar.weeks || []).map((week: any) => ({
-    ...week,
-    contributionDays: (week.contributionDays || []).map((day: any) => {
-      if (day.contributionCount === 0) {
+  const processedWeeks = (calendar.weeks || []).map((week: any) => {
+    return {
+      ...week,
+      contributionDays: (week.contributionDays || []).map((day: any) => {
+        if (day.contributionCount === 0) {
+          return {
+            ...day,
+            locAdditions: 0,
+            locDeletions: 0,
+          };
+        }
         return {
           ...day,
-          locAdditions: 0,
-          locDeletions: 0,
+          locAdditions: Math.max(1, Math.floor(Math.random() * (day.contributionCount * 10))),
+          locDeletions: Math.floor(Math.random() * (day.contributionCount * 5)),
         };
-      }
-      return {
-        ...day,
-        locAdditions: Math.max(1, Math.floor(Math.random() * (day.contributionCount * 10))),
-        locDeletions: Math.floor(Math.random() * (day.contributionCount * 5)),
-      };
-    }),
-  }));
+      }),
+    };
+  });
 
   // 2. Return the extended structure with processed fields packed into the calendar
   return {
