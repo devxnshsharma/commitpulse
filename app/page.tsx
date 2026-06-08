@@ -272,6 +272,7 @@ export default function LandingPage() {
           <WallOfLove />
         </FeatureCardsSection>
       </main>
+      {/* force format patch */}
       <Footer />
     </div>
   );
