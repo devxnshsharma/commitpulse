@@ -210,10 +210,11 @@ export async function GET(request: Request) {
     const animate = searchParams.get('animate') !== 'false';
     // Validate and clamp the speed param to prevent broken SVG animation
     const rawSpeedNum = speed ? parseFloat(String(speed)) : NaN;
-    const validatedSpeed =
+    const validatedSpeed = (
       !isNaN(rawSpeedNum) && isFinite(rawSpeedNum) && rawSpeedNum >= 1 && rawSpeedNum <= 60
         ? `${rawSpeedNum}s`
-        : '8s';
+        : '8s'
+    ) as `${number}s`;
     const params: BadgeParams = {
       user: targetEntity,
       bg: isAutoTheme ? selectedTheme.bg : bg || selectedTheme.bg,
