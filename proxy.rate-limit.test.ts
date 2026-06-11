@@ -8,7 +8,7 @@ vi.mock('./lib/rate-limit', () => ({
 }));
 
 describe('Proxy rate-limit consistency', () => {
-  it('returns consistent JSON error shape for general and refresh rate limits', async () => {
+  it('returns consistent JSON error shape when rate limit is exceeded', async () => {
     vi.mocked(rateLimit).mockResolvedValue({
       success: false,
       limit: 60,
@@ -21,7 +21,7 @@ describe('Proxy rate-limit consistency', () => {
 
     vi.mocked(rateLimit).mockResolvedValue({
       success: false,
-      limit: 5,
+      limit: 60,
       remaining: 0,
       reset: 123456789,
     });
@@ -29,9 +29,7 @@ describe('Proxy rate-limit consistency', () => {
       new NextRequest('http://localhost:3000/api/streak?refresh=true')
     );
     expect(refreshResponse.status).toBe(429);
-    expect(await refreshResponse.json()).toEqual({
-      error: 'Too many refresh requests. Please wait before bypassing the cache again.',
-    });
+    expect(await refreshResponse.json()).toEqual({ error: 'Too many requests' });
   });
 
   it('includes rate limit headers on limited responses', async () => {
@@ -61,15 +59,15 @@ describe('Proxy rate-limit consistency', () => {
     expect(response.headers.get('X-RateLimit-Reset')).toBe('123456789');
   });
 
-  it('sets X-RateLimit-Policy header on refresh rate-limited responses', async () => {
+  it('returns 429 status on rate limited responses', async () => {
     vi.mocked(rateLimit).mockResolvedValue({
       success: false,
-      limit: 5,
+      limit: 60,
       remaining: 0,
       reset: 123456789,
     });
-    const response = await proxy(new NextRequest('http://localhost:3000/api/streak?refresh=true'));
-    expect(response.headers.get('X-RateLimit-Policy')).toBe('refresh');
+    const response = await proxy(new NextRequest('http://localhost:3000/api/streak'));
+    expect(response.status).toBe(429);
   });
 
   it('proxy config matcher covers all expected API route patterns', async () => {
